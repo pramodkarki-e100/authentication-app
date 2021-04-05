@@ -6,7 +6,8 @@ import consola from 'consola';
 
 // import application constants
 import { DB, PORT } from './src/constants';
-
+// Routes exports
+import userAPIs from './src/api/users';
 // Initializing the express application
 const app = express();
 
@@ -14,6 +15,8 @@ const app = express();
 app.use(cors());
 app.use(json());
 
+// Inject sub router and apis
+app.use('/users', userAPIs);
 const main = async () => {
   try {
     // connect with the database
