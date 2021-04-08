@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { randomBytes } from 'crypto';
 import { join } from 'path';
-import passport from 'passport';
 
 import { DOMAIN } from '../constants';
 import { User } from '../models';
 import { RegisterValidations, AuthenticateValidations } from '../validators';
 import validationMiddleware from '../middlewares/validator-middleware';
 import sendMail from '../functions/email-sender';
+import { userAuth } from '../middlewares/auth-guard';
+
 const router = Router();
 
 /**
@@ -161,14 +162,10 @@ router.post(
  * @access PRIVATE
  * @type GET
  */
-router.get(
-  '/api/authenticate',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    return res.status(200).send({
-      message: 'Hello World',
-    });
-  }
-);
+router.get('/api/authenticate', userAuth, async (req, res) => {
+  return res.status(200).send({
+    message: 'Hello World',
+  });
+});
 
 export default router;

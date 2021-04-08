@@ -86,11 +86,3 @@ UserSchema.methods.getUserInfo = function () {
 const User = model('users', UserSchema);
 
 export default User;
-
-/**
- * {
-    "username": "sachineTendulakar23",
-    "email": "sachine23@gmail.com",
-    "password": "sachine123"
-}
- */
