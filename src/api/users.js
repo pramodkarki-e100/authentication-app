@@ -164,7 +164,7 @@ router.post(
  */
 router.get('/api/authenticate', userAuth, async (req, res) => {
   return res.status(200).send({
-    message: 'Hello World',
+    user: req.user,
   });
 });
 
