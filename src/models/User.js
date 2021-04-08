@@ -60,8 +60,8 @@ UserSchema.pre('save', async function (next) {
 });
 
 UserSchema.methods.comparePassword = async function (password) {
-  return await compare(password, this.password);
-  //   return (await (this.password === password)) ? true : false;
+  //   let result = await compare(password, this.password);
+  return (await (this.password === password)) ? true : false;
 };
 
 UserSchema.methods.generateJWT = async function () {
@@ -86,3 +86,11 @@ UserSchema.methods.getUserInfo = function () {
 const User = model('users', UserSchema);
 
 export default User;
+
+/**
+ * {
+    "username": "sachineTendulakar23",
+    "email": "sachine23@gmail.com",
+    "password": "sachine123"
+}
+ */

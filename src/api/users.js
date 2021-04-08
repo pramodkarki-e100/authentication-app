@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { randomBytes } from 'crypto';
 import { join } from 'path';
+import passport from 'passport';
 
 import { DOMAIN } from '../constants';
 import { User } from '../models';
 import { RegisterValidations, AuthenticateValidations } from '../validators';
 import validationMiddleware from '../middlewares/validator-middleware';
 import sendMail from '../functions/email-sender';
-
 const router = Router();
 
 /**
@@ -152,6 +152,22 @@ router.post(
         message: 'An error occured',
       });
     }
+  }
+);
+
+/**
+ * @description To get the authenticated user profile
+ * @api /users/api/authenticate
+ * @access PRIVATE
+ * @type GET
+ */
+router.get(
+  '/api/authenticate',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    return res.status(200).send({
+      message: 'Hello World',
+    });
   }
 );
 
