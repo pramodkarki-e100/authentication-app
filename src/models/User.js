@@ -55,11 +55,13 @@ UserSchema.pre('save', async function (next) {
   let user = this;
   if (!user.isModified('pasword')) return next();
   user.pasword = await hash(user.password, 10);
+  //   console.log('User password : ', user.password);
   next();
 });
 
 UserSchema.methods.comparePassword = async function (password) {
   return await compare(password, this.password);
+  //   return (await (this.password === password)) ? true : false;
 };
 
 UserSchema.methods.generateJWT = async function () {
@@ -78,7 +80,7 @@ UserSchema.methods.generatePasswordReset = function () {
 };
 
 UserSchema.methods.getUserInfo = function () {
-  return pick(this, ['_id', 'name', 'username', 'email']);
+  return pick(this, ['_id', 'name', 'username', 'email', 'verified']);
 };
 
 const User = model('users', UserSchema);

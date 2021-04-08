@@ -4,7 +4,7 @@ import { join } from 'path';
 
 import { DOMAIN } from '../constants';
 import { User } from '../models';
-import { RegisterValidations } from '../validators';
+import { RegisterValidations, AuthenticateValidations } from '../validators';
 import validationMiddleware from '../middlewares/validator-middleware';
 import sendMail from '../functions/email-sender';
 
@@ -16,7 +16,6 @@ const router = Router();
  * @api  /users/api/register
  * @type POST
  */
-
 router.post(
   '/api/register',
   RegisterValidations,
@@ -82,7 +81,7 @@ router.post(
 );
 
 /**
- * @description
+ * @description To verify a new user's account via email
  * @api /users/verify-now/:verificationCode
  * @access PUBLIC <Only via email>
  * @type GET
@@ -109,5 +108,51 @@ router.get('/verify-now/:verificationCode', async (req, res) => {
     );
   }
 });
+
+/**
+ * @description To authenticate a user and get the auth token during Login
+ * @api /users/api/authenticate
+ * @access PUBLIC
+ * @type POST
+ */
+router.post(
+  '/api/authenticate',
+  AuthenticateValidations,
+  validationMiddleware,
+  async (req, res) => {
+    try {
+      let { username, password } = req.body;
+
+      let user = await User.findOne({ username });
+      if (!user) {
+        return res.status(404).send({
+          success: false,
+          message: 'Username not found',
+        });
+      }
+
+      if (!(await user.comparePassword(password))) {
+        return res.status(401).send({
+          success: false,
+          message: 'Incorrect Password',
+        });
+      }
+
+      let token = await user.generateJWT();
+      return res.status(200).send({
+        success: true,
+        // user: user.getUserInfo(),
+        token: `Bearer ${token}`,
+        message: 'Hurray! You are now logged In',
+      });
+    } catch (err) {
+      console.log('ERR', err.message);
+      return res.status(500).send({
+        success: false,
+        message: 'An error occured',
+      });
+    }
+  }
+);
 
 export default router;
