@@ -104,9 +104,7 @@ router.get('/verify-now/:verificationCode', async (req, res) => {
       join(__dirname, '../templates/verification-success.html')
     );
   } catch (err) {
-    return res.sendFile(
-      join(__dirname, '../templates/verification-errors.html')
-    );
+    return res.sendFile(join(__dirname, '../templates/errors.html'));
   }
 });
 
@@ -168,14 +166,32 @@ router.get('/api/authenticate', userAuth, async (req, res) => {
   });
 });
 
+
+/**
+ * @description To initiate the password reset process
+ * @api /users/api/reset-password/
+ * @access Public
+ * @type POST
+ */
+// router.put('/api/reset-password')
+
 /**
  * @description To reset the password through Token
  * @api /users/reset-password/:resetPasswordToken
  * @access PRIVATE Restricted via Email
  * @type GET
  */
-router.get('/reset-password/:resetPasswordToken', async(req, res) => {
-    
-})
+router.get('/reset-password-now/:resetPasswordToken', async (req, res) => {
+  try {
+    let { resetPasswordToken } = req.params;
+    let user = User.findOne({ resetPasswordToken });
+    if (!user) {
+      throw new Error('User Not Found with this Token');
+    }
+    return res.sendFile(join(__dirname + '../templates/password-reset-success.html')))
+  } catch (err) {
+    return res.sendFile(join(__dirname + '../templates/errors.html'));
+  }
+});
 
 export default router;
