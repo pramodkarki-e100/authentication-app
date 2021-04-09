@@ -168,4 +168,14 @@ router.get('/api/authenticate', userAuth, async (req, res) => {
   });
 });
 
+/**
+ * @description To reset the password through Token
+ * @api /users/reset-password/:resetPasswordToken
+ * @access PRIVATE Restricted via Email
+ * @type GET
+ */
+router.get('/reset-password/:resetPasswordToken', async(req, res) => {
+    
+})
+
 export default router;
