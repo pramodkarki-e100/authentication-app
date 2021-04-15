@@ -176,43 +176,53 @@ router.get('/api/authenticate', userAuth, async (req, res) => {
  * @access Public
  * @type POST
  */
-router.put('/api/reset-password', ResetPassword, validationMiddleware, async (req, res) => {
+router.put(
+  '/api/reset-password',
+  ResetPassword,
+  validationMiddleware,
+  async (req, res) => {
     try {
-        let { email } = req.body;
+      let { email } = req.body;
 
-        let user = await User.findOne({ email });
-        if(!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'user with this email is not found'
-            })
-        }
+      let user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'user with this email is not found',
+        });
+      }
 
-        user.generatePasswordReset();
-        await user.save();
+      user.generatePasswordReset();
+      await user.save();
 
-        /** Send the password Reset link via email */
-        let html = `
+      /** Send the password Reset link via email */
+      let html = `
             <div>
                 <h1>Hello, ${user.username}</h1>
                 <p>Please click the following link to reset your password</p>
                 <p>If this password reset request is not created by you then you can ignore this email</p>
                 <a href="${DOMAIN}users/reset-password-now/${user.resetPasswordToken}">Verify Now</a>
             </div>
-        `
-        await sendMail(user.email, "Verify Account, ")
-        return res.status(201).json({
-            success: true,
-            message: 'Password Reset Link is sent in your Email'
-        })
-
-    } catch(err) {
-        return res.status(500).json({
-            success: false,
-            message: 'An error occured'
-        })
+        `;
+      await sendMail(
+        user.email,
+        'Reset Password',
+        'Please reset your password',
+        html
+      );
+      return res.status(201).json({
+        success: true,
+        message:
+          'Password Reset Link is sent in your email. Please Verify Now !!',
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: 'An error occured',
+      });
     }
-})
+  }
+);
 
 /**
  * @description To reset the password through Token
@@ -223,9 +233,16 @@ router.put('/api/reset-password', ResetPassword, validationMiddleware, async (re
 router.get('/reset-password-now/:resetPasswordToken', async (req, res) => {
   try {
     let { resetPasswordToken } = req.params;
-    let user = User.findOne({ resetPasswordToken });
+    let user = User.findOne({
+      resetPasswordToken,
+      resetPasswordExpiresIn: { $gt: Date.now() },
+    });
+
     if (!user) {
-      throw new Error('User Not Found with this Token');
+      res.status(401).json({
+        success: false,
+        message: 'Password reset token is invalid or has expired',
+      });
     }
     return res.sendFile(
       join(__dirname + '../templates/password-reset-success.html')
@@ -233,6 +250,16 @@ router.get('/reset-password-now/:resetPasswordToken', async (req, res) => {
   } catch (err) {
     return res.sendFile(join(__dirname + '../templates/errors.html'));
   }
+});
+
+/**
+ * @description
+ * @api /users/api/reset-password-now
+ * @access Restricted via email
+ * @type  POST
+ */
+router.post('/api/reset-password-now', async (req, res) => {
+  return res.json(req.body);
 });
 
 export default router;
